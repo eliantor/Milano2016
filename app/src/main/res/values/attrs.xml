@@ -4,4 +4,6 @@
         <attr name="interactive" format="boolean"/>
         <attr name="textSize" format="dimension"/>
     </declare-styleable>
+
+    <attr name="radio" format="boolean"/>
 </resources>
