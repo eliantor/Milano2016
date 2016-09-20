@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+<ImageView
+    android:id="@+id/_src_img_"
+    android:adjustViewBounds="false"
+    android:scaleType="centerInside"
+    android:layout_width="40dp"
+    android:layout_height="40dp"/>
+
+        <TextView
+            android:id="@+id/_txt_title_"
+            android:text="Ciao"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/_txt_subtitle_"
+            android:text="Wow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/_btn_action"
+        android:layout_gravity="center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+</merge>

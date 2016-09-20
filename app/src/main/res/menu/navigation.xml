@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item
+    android:title="First Screen"
+    android:id="@+id/nav_first"/>
+    <item
+        android:title="Second Screen"
+        android:id="@+id/nav_second"/>
+</menu>
