@@ -10,7 +10,9 @@ import android.view.ViewGroup;
  * Created by aktor on 19/09/16.
  */
 
-public abstract class RecyclerViewBindingAdapter extends RecyclerView.Adapter<BindingViewHolder> {
+public abstract class RecyclerViewBindingAdapter
+        extends RecyclerView.Adapter<BindingViewHolder> {
+
     @Override
     public BindingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view =LayoutInflater.from(parent.getContext()).inflate(getLayout(parent,viewType),parent,false);
@@ -20,6 +22,11 @@ public abstract class RecyclerViewBindingAdapter extends RecyclerView.Adapter<Bi
 
     public abstract int getLayout(ViewGroup parent, int viewType);
 
+
+    @Override
+    public int getItemCount() {
+        return 0;
+    }
 
     @Override
     public void onBindViewHolder(BindingViewHolder holder, int position) {
