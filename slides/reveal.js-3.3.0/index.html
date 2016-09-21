@@ -1,0 +1,735 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/solarized.css">
+
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<style type="text/css">
+			.reveal section img { background:none; border:none; box-shadow:none; }
+
+			.left-aligned { text-align: left;}
+			.sol-yellow {
+				color:  #b58900;
+			}
+			.sol-orange {
+				color:  #cb4b16;
+			}
+			.sol-red {
+				color: #dc322f;
+			}
+			.sol-magenta {
+				color: #d33682;
+			}
+			.sol-violet {
+				color: #6c71c4;
+			}
+			.sol-blue {
+				color: #268bd2;
+			}
+			.sol-cyan {
+				color: #2aa198;
+			}
+			.sol-green {
+				color: #859900;
+			}
+
+		</style>
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal linear center">
+			<div class="slides">
+				<section class="left-aligned">
+					<img src="imgs/android_black_robot.png" style="width: 220px;height: auto">
+					<h2>Android<br/>Corso Avanzato</h2>
+					<p class="sol-blue">Andrea Tortorella</p>
+				</section>
+				<section >
+					<h3>Tematiche</h3>
+					<ol class="left-aligned">
+						<li>Ui avanzate</li>
+						<li>Context awareness</li>
+						<li>Invadere la home screen/Push notifications</li>
+						<li>Cloud/Server Syncing</li>
+					</ol>
+				</section>
+
+				<section>
+					<h2>UI Avanzate</h2>
+				</section>
+
+				<section>
+					<h3>UI expectations</h3>
+					<p>Nessun utente del vostro servizio valuterà mai la vostra app per come è bello il vostro codice</p>
+					<p>La complessità delle UI mobile cresce di anno in anno</p>
+					<p>Imarare la lingua dei designer</p>
+					<p>Tradurre un design in codice, mantenendone l'usabilità/programmabilità e le performance</p>
+				</section>
+				<section>
+					<h3>UI expectations</h3>
+					<ul>
+						<li>I pattern comuni della UI/DataBinding</li>
+						<li>Usare i componenti standard</li>
+						<li>Compound views</li>
+						<li>Custom widgets</li>
+					</ul>
+				</section>
+
+				<section>
+					<section>
+						<h3>Databinding</h3>
+						<ul>
+							<li>Supporto al two way databinding in modo efficiente</li>
+							<li>Permette di aggiungere logica ai file di layout</li>
+							<li>Code generation</li>
+						</ul>
+						<pre><code data-lang-gradle>android {
+    dataBinding {
+        enabled = true
+    }
+}</code></pre>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h3>Componenti standard</h3>
+						<ul>
+							<li>Toolbar e CoordinatorLayout</li>
+							<li>NavigationDrawer (navigazione)</li>
+							<li>Tabs e ViewPager (navigazione)</li>
+							<!--<li>RecyclerView</li>-->
+						</ul>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h3>L'interno di View</h3>
+						<ul>
+							<li>Calcolare le dimensioni</li>
+							<li>Disporre i componenti sullo schermo</li>
+							<li>Disegnare se stessa e i sotto componenti</li>
+							<li>Salvare e ripristinare il proprio stato</li>
+							<li>Interpretare l'input utente</li>
+							<li>Esporre proprietà accessibili dall'xml</li>
+						</ul>
+					</section>
+					<section>
+						<pre><code data-trim data-noescape data-lang-java>public class CustomView extends View {
+    public CustomView(Context context, AttributeSet attrs, int defStyleAttr) {super(context, attrs, defStyleAttr);}
+
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) { }
+
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) { }
+
+    protected void onDraw(Canvas canvas) { }
+
+    protected Parcelable onSaveInstanceState() { return super.onSaveInstanceState();}
+
+    protected void onRestoreInstanceState(Parcelable state) {super.onRestoreInstanceState(state);}
+
+    public boolean onTouchEvent(MotionEvent event) { return super.onTouchEvent(event); }
+
+    @Override
+    protected void onAttachedToWindow() {super.onAttachedToWindow();}
+
+    @Override
+    protected void onDetachedFromWindow() {super.onDetachedFromWindow();}
+}</code></pre>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h3>Compound views</h3>
+						<ul>
+						<li>Un insieme di widget che funzionano sempre in modo coordinato</>
+						<li>Difficilmente sono riutilizzabili fuori dalla specifica app</li>
+						<li>Elevano il linguaggio della ui al modello applicativo</li>
+						<li>Alternativa all'uso dei fragment</li>
+						<li>Appiattire i layout</li>
+						</ul>
+					</section>
+					<section>
+						<p>Merging in sub components/and exposing methods</p>
+						<ul>
+							<li>Una compound view parte sempre da un <span class="sol-violet">ViewGroup</span> </li>
+							<li>Espandere i componenti nel costruttore: <span class="sol-violet">tag merge</span></li>
+							<li>Trovare i figli aggiunti dall'esterno in <span class="sol-violet">onFinishInflate</span></li>
+						</ul>
+					</section>
+
+					<section>
+						<p>Esporre attributi</p>
+						<ul>
+							<li>Le view sono configurabili tramite attributi</li>
+							<li>Possiamo dichiarare un gruppo di attributi con <span class="sol-violet">declare-styleable</span> </li>
+							<li>... e recuperarne i valori tramite <span class="sol-violet">obtainStyledAttributes</span> </li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h3>Custom Widgets</h3>
+						<ul>
+							<li>Ogni componente standard una volta era un custom widget</li>
+							<li>Complessità estremamente variabile</li>
+							<li>Più comuni di quanto ci si possa aspettare</li>
+							<li>Danno unicità ala vostra applicazione</li>
+						</ul>
+					</section>
+					<section>
+						<p>Misurare la view</p>
+						<ul>
+							<li>Nel metodo <span class="sol-violet">onMeasure</span> dobbiamo calcolare le dimensioni della nostra view</li>
+							<li>I constraint ci arrivano come parametri interi (MODE + SIZE)</li>
+							<li>Mode: <span class="sol-violet">EXACTLY</span>, <span class="sol-violet">AT_MOST</span>, <span class="sol-violet">UNSPECIFIED</span></li>
+							<li>Se la view contiene figli iterare e misurare i figli</li>
+							<li>Comunicare la propria dimensione al sistema <span class="sol-violet">setMeasuredDimension</span></li>
+						</ul>
+					</section>
+					<section>
+						<p>Disegnare sullo schermo</p>
+						<ul>
+							<li>Durante <span>onDraw</span></li>
+							<li>Se abbiamo bisogno di aggiornare il disegno <span>invalidate()</span></li>
+							<li><span class="sol-orange">Canvas</span>: la tela su cui disegnare</li>
+							<li><span class="sol-orange">Path</span>: un tracciato da disegnare</li>
+							<li><span class="sol-orange">Paint</span>: le informazioni sullo stile</li>
+							<li>Obiettivo 16ms tra invalidate e fine del disegno. (es. mai allocare oggetti in onDraw)</li>
+						</ul>
+					</section>
+					<section>
+						<p>Gestire gli eventi touch</p>
+						<ul>
+							<li>Quando l'utente tocca lo schermo, il metodo onTouchEvent viene chiamato molte volte</li>
+							<li><span class="sol-orange">MotionEvent</span> contiene tutti i dati di interesse</li>
+							<li>Il codice può diventare molto complicato. Sono disponibili numerosi helper:
+								<span class="sol-violet">GestureDetector</span>,<span class="sol-violet">VelocityTracker</span>,
+								<span class="sol-violet">ViewDragHelper</span>,<span>Scroller</span></li>
+						</ul>
+					</section>
+					<section>
+						<p>Custom layout</p>
+						<ul>
+							<li>Fornire <span class="sol-violet">LayoutParams</span> per comunicare con il parent</li>
+							<li>onLayout dispone le view sullo schermo</li>
+							<li>Gran parte del lavoro è già stato fatto da onMeasure.</li>
+							<li>Possiamo usare LayoutParams per cachare informazioni</li>
+						</ul>
+					</section>
+				</section>
+				<section>
+						<h3>Animazioni</h3>
+						<ul>
+							<li>Aggiungono vita alla nostra app</li>
+							<li>Il movimento è uno strumento per guidare l'attenzione</li>
+							<li>PropertyAnimations</li>
+							<li>Drawable Animations (specialmente utili con vector drawables)</li>
+						</ul>
+				</section>
+				<!--
+				<section>
+					<section>
+					<h3>Transizioni e Material design</h3>
+					<ul>
+						<li>Da Lollipop in poi</li>
+						<li>Guidano l'utente tra le varie schermate</li>
+						<li>Si possono creare transizioni d'entrata/uscita e con elementi condivisi</li>
+					</ul>
+					</section>
+					<section>
+						<h4>Abilitare le transitions</h4>
+						<ul><li>
+							<p>Nel tema</p>
+						<pre><code data-lang-xml><item name="android:windowActivityTransitions">true</item>
+<item name="android:windowExitTransition">@transition/explode</item>
+<item name="android:windowEnterTransition">@transition/explode</item></code></pre></li>
+						<li>
+							<p>Da un'activity</p>
+<pre><code data-lang-java>getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+getWindow().setEnterTransition(new Explode());</code></pre>
+						</li></ul>
+					</section>
+					<section>
+						<h4>Avviare un'activity con una transition</h4>
+<pre><code data-lang-java data-noescape>ActivityOptionsCompat opts = ActivityOptionsCompat.makeSceneTransitionAnimation(this);
+ActivityCompat.startActivity(this,intent,opts.toBundle());</code></pre>
+						<h4>Shared Elements</h4>
+<pre><code data-lang-java data-noescape>ActivityOptionsCompat.makeSceneTransitionAnimation(this,view,"sharedElementName");
+ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+         Pair.create(view,"name"),
+         Pair.create(view2,"name2"));</code></pre>
+						<p>I layout devono condividere gli stessi <span class="sol-violet">android:transitionName</span> (databinding!!!)</p>
+						<h4>Ritornare da una transition:</h4>
+<pre><code data-lang-java data-noescape>ActivityCompat.finishAfterTransition(this);</code></pre>
+					</section>
+				</section>
+-->
+				<!--<section>-->
+					<!--<section>-->
+						<!--<h3>Animazioni</h3>-->
+						<!--<p>Enchant ME</p>-->
+						<!--<p>Simplify my life</p>-->
+						<!--<p>Make me amazing</p>-->
+					<!--</section>-->
+				<!--</section>-->
+
+
+				<section>
+					<h2>Context Awareness</h2>
+					<ul>
+						<li>Molte informazioni possono essere dedotte senza richieste all'utente</li>
+						<li>Dati provenienti dai sensori, o da una combinazione dei loro input</li>
+						<li>L'uso reiterato delle funzioni, ci permette di imparare i comportamenti</li>
+						<li>Usare informazioni non richieste esplicitamente può risultare invasivo</li>
+					</ul>
+				</section>
+				<section>
+					<section>
+					<h2>Android Permission Model</h2>
+					<p>Alcune API/funzionalità, sono protette da uno più permessi. Un'app che voglia usare una di queste funzionalità, deve ricevere il consenso dall'utente</p>
+					</section>
+					<section>
+						<ul>
+							<li>Pre Marshmallow (API 23) modello di permessi statici. Per usare un'app bisogna acconsentire a tutti i permessi</li>
+							<li>Da Marshmallow modello di permessi rinnovato. L'utente può accettare/rifiutare dinamicamente i permessi</li>
+						</ul>
+						<p>Nel vecchio modello, un'app installata ha sempre tutti i permessi. Con il nuovo modello si deve gestire il caso in cui l'utente voglia usare solo parte della nostra App.</p>
+					</section>
+					<section>
+						<h4>Permissions</h4>
+						<ul>
+							<li>Ho bisogno di un permesso quando esco dalla sandbox dell'app</li>
+							<li>Si possono creare permessi nuovi, anche associati alla firma</li>
+							<li>I permessi appartengono a diversi livelli di protezione</li>
+							<li>Solo i permessi <span class="sol-orange">dangerous</span> richiedono autorizzazione a runtime</li>
+							<li>I permessi sono divisi in gruppi. L'utente viene interpellato solo per il primo permesso richiesto di ogni gruppo</li>
+							<li>Alcuni permessi implicano la presenza di specifiche features (che potrebbero non essere disponibili)</li>
+						</ul>
+					</section>
+
+					<section>
+						<h4>Richidere un permesso a runtime</h4>
+						<pre><code data-lang-java data-noescape>//...
+int grant = ContextCompat.checkSelfPermission(context,
+Manifest.permission.ACCESS_FINE_LOCATION);
+if(grant == PackageManger.PERMISSION_GRANTED) {
+	// ok proceed
+} else {
+	// no permission. request asincronously
+	if(ActivityCompat.shouldShowRequestPermissionRationale(this,
+		Manifest.permission.ACCESS_FINE_LOCATION)){
+		// educate the user
+	} else {
+    	ActivityCompat.requestPermissions(this,
+			new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+			REQUEST_CODE);
+	}
+}</code></pre>
+					</section>
+					<section>
+						<h4>Richidere un permesso a runtime</h4>
+						<pre><code data-lang-java data-noescape>
+public void onRequestPermissionsResult(int code,String[] permissions,int[] grants){
+	// se permesso non garantito disabilitare la funzionalità, altrimenti procedere
+}</code></pre>
+						<h4>Chidere all'utente di riabilitare il permesso</h4>
+						<pre><code data-lang-java data-noescape data-trim>
+Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+Uri uri = Uri.fromParts("package", context.getPackageName(), null);
+intent.setData(uri);
+// Start for result
+startForResult(activityOrFragment, intent, REQUEST_CODE);</code></pre>
+					</section>
+				</section>
+
+				<section>
+					<h3>Context Awareness: Geolocation</h3>
+					<ul>
+						<li>Conoscere la posizione dell'utente</li>
+						<li>Geocoding/Places</li>
+						<li>Mappe</li>
+						<li>Geofencing</li>
+					</ul>
+				</section>
+				<section>
+					<section>
+					<h3>Location APIS</h3>
+					<ul>
+						<li>Il sistema di localizzazione si basa su una tecnica nota come Assisted GPS</li>
+						<li>I dati provengono da diversi provider: GPS, ma anche wifi e cella telefonica</li>
+						<li>Android LocationManager: api di sistema per accedere ai dati sulla posizione</li>
+						<li>FusedLocationProvider: provider di localizzazione fornito come libreria esterna</li>
+					</ul>
+					</section>
+					<section>
+						<h3>Considerazioni importanti</h3>
+						<ul>
+							<li>Ogni provider ha caratteristiche diverse, precisione, tempo di acquisizione del dato, dispendio energetico...</li>
+							<li>Queste caratteristiche mutano a seconda di vari fattori ambientali</li>
+							<li>Usare il LocationManager lascia l'intera responsabilità allo sviluppatore</li>
+							<li>FusedLocationProvider: implementa le best practices stabilite. Consente alle app di cooperare tra loro</li>
+						</ul>
+					</section>
+					<section>
+						<h3>Includere l'api del FusedLocationProvider/GooglePlayServices</h3>
+						<pre><code data-lang-gradle>com.google.android.gms:play-services-location:9.4.0</code></pre>
+						<pre><code data-lang-xml><uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/></code></pre>
+						<pre><code data-lang-java>mGClient = new GoogleApiClient.Builder(this)
+.addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {}
+        @Override
+        public void onConnectionSuspended(int cause) {}
+    }).enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
+        @Override
+        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {}
+    }).addApi(LocationServices.API)
+    .build();</code></pre>
+					</section>
+
+					<section>
+						<h3>Richiedere la posizione corrente</h3>
+						<ul>
+							<li>Posizione richiesta anche da altre app</li>
+							<li><pre><code data-lang-java>Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGClient);</code></pre></li>
+						</ul>
+					</section>
+					<section>
+						<h3>Richidere aggiornamenti continui sulla posizione</h3>
+						<pre><code data-lang-java>LocationRequest req = new LocationRequest();
+req.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+req.setExpirationTime(100000);
+req.setSmallestDisplacement(100.0f);
+LocationServices.FusedLocationApi.requestLocationUpdates(mGClient,
+    req, new LocationListener() {
+        @Override
+        public void onLocationChanged(android.location.Location location) {}
+});
+
+LocationServices.FusedLocationApi.removeLocationUpdates(mGClient,listener);
+						</code></pre>
+					</section>
+					<section>
+						<h3>Assicurarsi che l'hardware di localizzazione sia abilitato</h3>
+						<pre><code data-lang-java>  LocationSettingsRequest settings = new LocationSettingsRequest.Builder()
+                                .addLocationRequest(req)
+                                .build();
+PendingResult&lt;LocationSettingsResult&gt; result = LocationServices.SettingsApi.checkLocationSettings(mGClient, settings);
+result.setResultCallback(new ResultCallback&lt;LocationSettingsResult&gt;() {
+   @Override
+   public void onResult(@NonNull LocationSettingsResult r) {
+      if (r.getStatus().getStatusCode()== LocationSettingsStatusCodes.RESOLUTION_REQUIRED){
+          r.getStatus().startResolutionForResult();
+      }
+   }
+});</code></pre>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h3>Geocoding</h3>
+						<ul>
+						<li>Si definisce geocoding il processo con cui si trasforma un indirizzo nelle corrispondenti coordinate geografiche</li>
+						<li>Il processo inverso, ovvero la ricerca di un indirizzo date le coordinate, si chiama reverse geocoding</li>
+						<li>Android fornisce queste funzionalità nella classe Geocoder (non tutti i device ne hanno uno)</li>
+						<li>Potenzialmente accede alla rete</li>
+						</ul>
+					</section>
+					<section>
+						<h3>Geocoding</h3>
+						<pre><code data-lang-java>if (Geocoder.isPresent()) {
+    Geocoder geo = new Geocoder(context);
+    List&lt;Address&gt; fromLocation = geo.getFromLocation(90, 40.5, 2);
+    for (Address address : fromLocation) {
+       //...
+    }
+    List&lt;Address&gt; addresses = geo.getFromLocationName("Via Como", 5,...);
+}</code></pre>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h3>Mappe</h3>
+						<p>Google fornisce un'API completa per implementare applicazioni basate su mappe in Android</p>
+						<p>È richiesto l'uso di un API key</p>
+					</section>
+					<section>
+						<ul>
+							<li>Configurare un progetto Google</li>
+							<li>Creare un oggetto mappa</li>
+							<li>Mappe lite (non interattive)</li>
+							<li>Personalizzare UI e gesture</li>
+							<li>Aggiungere la propria posizione</li>
+							<li>Gestire la Camera</li>
+							<li>Aggiungere markers</li>
+							<li>Disegnare su una mappa</li>
+							<li>Overlays (ground/tiles)</li>
+							<!--<li>Street View</li>-->
+							<!--<li>Interagire con Google Maps App</li>-->
+						</ul>
+					</section>
+					<section>
+						<h4>Configurazione</h4>
+						<ul>
+							<li>
+							<pre><code data-lang-gradle data-noescape>compile 'com.google.android.gms:play-services-maps:9.4.0'</code></pre>
+							</li>
+							<li>Creare un progetto sulla console google</li>
+							<li>Generare un api key <pre><code>keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android</code></pre></li>
+							<li>Aggiungere l'api key al manifest e i permessi
+								<pre><code data-lang-xml>&lt;uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /&gt;
+&lt;!-- EXTERNAL_STORAGE permissions are optional for Android 6.0 onwards. --&gt;
+&lt;uses-permission
+	android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+	android:maxSdkVersion="22" /&gt;
+&lt;uses-permission
+	android:name="android.permission.READ_EXTERNAL_STORAGE"
+	android:maxSdkVersion="22" /&gt;
+&lt;application&gt;
+	&lt;meta-data
+		android:name="com.google.android.geo.API_KEY"
+		android:value="@string/google_maps_key"/&gt;
+&lt;/application&gt;</code></pre>
+							</li>
+						</ul>
+
+					</section>
+					<section>
+						<h4>Oggetto Mappa</h4>
+						<ul>
+							<li>Ottenibile da un fragment</li>
+							<li>Includendo la view (bisogna delegare le callback)</li>
+							<li>La view non è l'oggetto mappa con cui interagiamo</li>
+							<pre><code data-lang-java>mMapView.getMapAsync(new OnMapReadyCallback() {
+   @Override
+   public void onMapReady(GoogleMap googleMap) {
+   }
+});
+							</code></pre>
+						</ul>
+					</section>
+				</section>
+				<!--<section>-->
+					<!--<section>-->
+						<!--<h3>Places API</h3>-->
+					<!--</section>-->
+				<!--</section>-->
+
+				<section>
+					<section>
+						<h3>Geofencing</h3>
+						<p>Una geofence è per la localizzazione quello che una sveglia è per un orologio: ovvero un trigger che scatta quando l'utente è in prossimità di un certo luogo</p>
+					</section>
+					<section>
+						<div>
+						<img src="./imgs/geofence.png" style="width: 40%;height: auto">
+							<ul>
+								<li>Coordinate della geofence</li>
+								<li>Perimetro</li>
+								<li>Transizione/i d'interesse</li>
+								<li>Durata</li>
+							</ul>
+						</div>
+						<p>
+							Si possono avere un massimo di 100 geofence attive per app
+						</p>
+					</section>
+					<section>
+						<h4>Monitorare una Geofence</h4>
+<pre><code data-lang-java>GeofencingRequest g=new GeofencingRequest.Builder()
+   .addGeofence(new Geofence.Builder()
+   .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL).
+    setCircularRegion(40,20,150f)
+     .setRequestId("THIS")
+     .build())
+	.build();
+PendingResult&ltStatus&gt statusPendingResult = LocationServices.GeofencingApi.addGeofences(mGClient, g, intent);
+LocationServices.GeofencingApi.removeGeofences(mGClient,/*intent or ids*/);
+</code></pre>
+					</section>
+<section><pre><code data-lang-java>GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);</code></pre></section>
+					<section>
+						<h3>Considerazioni</h3>
+						<ul>
+							<li>Il sistema di geofence usa il NLP</li>
+							<li>Consumo della batteria: (usare fence ampie per luoghi dove l'utente staziona a lungo)</li>
+							<li>Usare un intervallo di responsività più ampio</li>
+							<li>Raggio ottimale della geofence (precisione media di 50mt)</li>
+							<li>Evitare spam, usando <pre>GEOFENCE_TRANSITION_DWELL</pre> e aumentare il loitering delay</li>
+							<li>Geofence cancellate al reboot</li>
+							<li>Considerate la latenza del trigger</li>
+							<li>Considerare la connettività</li>
+						</ul>
+					</section>
+				</section>
+
+				<!--<section>-->
+					<!--<section>-->
+						<!--<h3>Context Awareness: Activity Recognition</h3>-->
+						<!--<ul>-->
+							<!--<li>Cosa sta facendo l'utente?</li>-->
+						<!--</ul>-->
+					<!--</section>-->
+				<!--</section>-->
+
+				<section>
+					<h2>Apps are not websites</h2>
+					<ul>
+						<li>Working in background</li>
+						<li>Working offline</li>
+						<li>Gestire le notifiche</li>
+						<li>Invadere la home screen</li>
+					</ul>
+				</section>
+
+				<section>
+					<section>
+						<h3>Notifiche</h3>
+						<ul>
+							<li>Anatomia di una notifica</li>
+							<li>Notifiche in foreground</li>
+							<li>Azioni</li>
+							<li>Android Wear</li>
+							<li>Eventi trigger/Alarm Manager</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<h3>Firebase cloud messaging</h3>
+					<ul>
+						<li>Inviare messaggi dal server ai device</li>
+						<li>Inviare messaggi upstream verso il server (meno comune)</li>
+						<li>Device groups</li>
+						<li>Topics</li>
+					</ul>
+				</section>
+				<section>
+					<h3>App Widgets</h3>
+					<ul>
+						<li>Mostrare un semplice</li>
+						<li>Considerazioni di design</li>
+						<li>Aggiungere widget al lockscreen</li>
+						<li>Aggiornare il contenuto di un widget</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Sincronizzarsi con il cloud/lavorare in background</h3>
+					<ul>
+						<li>Sync Adapter</li>
+						<li>JobScheduler</li>
+						<li>GCMNetworkManager</li>
+					</ul>
+				</section>
+				<section>
+					<section>
+						<h3>Sync Adapter</h3>
+						<ul>
+							<li>Meccanismo a plugin, che permette di aggiungere codice di rete al sistema</li>
+							<li>Esecuzione automatica</li>
+							<li>Controllo della connettività automatico</li>
+							<li>Scheduling di sistema</li>
+							<li>Minimizzazione del consumo di batteria</li>
+						</ul>
+					</section>
+					<section>
+						<h3>Requisiti</h3>
+						<ol>
+							<li>Creare un content provider per la gestione dei dati</li>
+							<li>Integrare il sistema di account management di sistema</li>
+							<li>Creare il nostro SyncAdapter</li>
+						</ol>
+					</section>
+					<section>
+						<h3>Recap su content provider</h3>
+						<p>Il content provider deve essere sincronizzabile <pre>android:syncable=true</pre></p>
+					</section>
+					<section>
+						<h3>Authenticator</h3>
+						<ul>
+							<li>Il sync adapter assume che la sincronizzazione abbia bisogno di un'autenticazione</li>
+							<li>Si usa il framework degli account di sistema <pre>AbstractAccountAuthenticator</pre></li>
+							<li>È sufficiente uno Stub</li>
+						</ul>
+					</section>
+					<section>
+						<h3>Il flow di autenticazione</h3>
+						<img src="./imgs/auth.png"  style="width: 400px;height: auto">
+					</section>
+					<section>
+						<h3>Il sync adapter</h3>
+
+					</section>
+					<section>
+						<h3>Sincronizzazione</h3>
+					</section>
+
+				</section>
+
+				<section>
+					<section>
+						<h3>JobScheduler/GCMNetworkManager</h3>
+						<ul>
+							<li>JobScheduler API disponibile sul 54% dei device</li>
+							<li>GCMNetworkManager retrocompatibile fino all'api 9 (99.9% dei device)</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h3>In app purchases</h3>
+					</section>
+
+				</section>
+			</div>
+		</div>
+
+
+
+
+
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+				height: '100%',
+				width: '100%',
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+			Reveal.configure({
+				slideNumber: 'c/t'
+			});
+		</script>
+	</body>
+</html>

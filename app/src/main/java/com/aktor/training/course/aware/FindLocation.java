@@ -17,12 +17,24 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.aktor.training.course.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.util.List;
@@ -38,9 +50,27 @@ public class FindLocation extends AppCompatActivity implements GoogleApiClient.C
 
     private GoogleApiClient mClient;
 
+    private MapView mMapView;
+    private GoogleMap mGMap;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.my_map_ui);
+        MapsInitializer.initialize(this);
+
+
+        mMapView = (MapView)findViewById(R.id.my_map);
+
+        mMapView.onCreate(savedInstanceState);
+
+        mMapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                initMap(googleMap);
+            }
+        });
+
         mClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
@@ -48,6 +78,42 @@ public class FindLocation extends AppCompatActivity implements GoogleApiClient.C
                 .build();
     }
 
+    private void initMap(GoogleMap map){
+        mGMap = map;
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mMapView.onResume();
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mMapView.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mMapView.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mMapView.onDestroy();
+    }
+
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapView.onLowMemory();
+    }
 
     private void findLocationSafely() {
         if (mClient != null && mClient.isConnected()) {
@@ -85,6 +151,37 @@ public class FindLocation extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private void findAddress(Location lastLocation) {
+        if (mGMap != null){
+            LatLng loc=new LatLng(lastLocation.getLatitude(),lastLocation.getLongitude());
+            CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(loc, 13.0f);
+            mGMap.animateCamera(cu);
+
+            mGMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+                @Override
+                public void onMarkerDragStart(Marker marker) {
+
+                }
+
+                @Override
+                public void onMarkerDrag(Marker marker) {
+
+                }
+
+                @Override
+                public void onMarkerDragEnd(Marker marker) {
+
+                }
+            });
+            MarkerOptions mo  = new MarkerOptions();
+
+            mo.position(loc).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+            mo.draggable(true);
+            mo.title("Title").snippet("Testo");
+
+            Marker marker = mGMap.addMarker(mo);
+            String id = marker.getId();
+
+        }
         ///WARNING
         if (Geocoder.isPresent()){
             Geocoder geo = new Geocoder(this);
