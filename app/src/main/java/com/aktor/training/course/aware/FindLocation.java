@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,11 +17,17 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 
 import com.aktor.training.course.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderApi;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -57,9 +64,15 @@ public class FindLocation extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.my_map_ui);
+
         MapsInitializer.initialize(this);
 
-
+        findViewById(R.id.add_fence).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addGeoFence();
+            }
+        });
         mMapView = (MapView)findViewById(R.id.my_map);
 
         mMapView.onCreate(savedInstanceState);
@@ -78,6 +91,35 @@ public class FindLocation extends AppCompatActivity implements GoogleApiClient.C
                 .build();
     }
 
+
+    private void addGeoFence(){
+        Geofence fence = new Geofence.Builder()
+                .setCircularRegion(40.0,40.0,200.0f)
+                .setLoiteringDelay(10)
+                .setNotificationResponsiveness(6000)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setRequestId("MY_GEOFENCE")
+                .build();
+
+        GeofencingRequest req = new GeofencingRequest.Builder()
+                .addGeofence(fence)
+                .build();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        Intent launch= new Intent(this,NotifyPosition.class);
+        PendingIntent pi = PendingIntent.getService(this,0,launch,0);
+        PendingResult<Status> res =
+                LocationServices.GeofencingApi.addGeofences(mClient, req, pi);
+        res.setResultCallback(new ResultCallback<Status>() {
+            @Override
+            public void onResult(@NonNull Status status) {
+
+            }
+        });
+    }
     private void initMap(GoogleMap map){
         mGMap = map;
     }
@@ -169,17 +211,20 @@ public class FindLocation extends AppCompatActivity implements GoogleApiClient.C
 
                 @Override
                 public void onMarkerDragEnd(Marker marker) {
+                    LatLng position = marker.getPosition();
 
                 }
             });
             MarkerOptions mo  = new MarkerOptions();
 
-            mo.position(loc).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+            mo.position(loc)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
             mo.draggable(true);
-            mo.title("Title").snippet("Testo");
+//            mo.title("Title").snippet("Testo");
 
             Marker marker = mGMap.addMarker(mo);
             String id = marker.getId();
+
 
         }
         ///WARNING

@@ -615,22 +615,120 @@ LocationServices.GeofencingApi.removeGeofences(mGClient,/*intent or ids*/);
 				</section>
 
 				<section>
+					<section>
 					<h3>Firebase cloud messaging</h3>
 					<ul>
 						<li>Inviare messaggi dal server ai device</li>
 						<li>Inviare messaggi upstream verso il server (meno comune)</li>
-						<li>Device groups</li>
 						<li>Topics</li>
 					</ul>
+					</section>
+					<section>
+						<h4>FCM</h4>
+						<table>
+							<th>
+								<td>Data</td>
+							<td>Notifica</td>
+							<td>Data/Notifica</td>
+							</th>
+							<tr>
+								<td>FOREGROUND</td><td>*</td><td>*</td><td>*</td>
+
+							</tr>
+							<tr>
+								<td>BACKGROUND</td><td>*</td><td></td><td>entrambi</td>
+							</tr>
+						</table>
+
+					</section>
+					<section>
+						<h4>FCM</h4>
+						<ul>
+							<li>Creare un progetto Firebase</li>
+							<li>Generare e includere il file json di configurazione</li>
+							<li>Aggiungere plugin gradle</li>
+						</ul>
+					</section>
+					<section>
+						<h4>FCM</h4>
+						<pre><code data-lang-gradle>buildscript {
+  dependencies{
+    classpath 'com.google.gms:google-services:3.0.0'
+  }
+}
+
+compile 'com.google.firebase:firebase-messaging:9.4.0'
+apply plugin: 'com.google.gms.google-services'</code></pre>
+						<pre><code data-lang-xml><service android:name=".MessagingService">
+  <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+</service>
+<service android:name=".IidService">
+<action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+</service></code></pre>
+					</section>
+					<section>
+					<h4>FCM</h4>
+<pre><code data-lang-java>
+class IidService extends FirebaseInstanceIdService{
+  public void onRefreshToken(){
+    String token = FirebaseInstanceId.getInstance().getToken();
+	registerWithServer(token);
+  }
+}
+
+class MessagingService extends FirebaseMessagingService{
+	public void onMessageReceived(RemoteMessage message){
+	}
+}</code></pre>
+					</section>
 				</section>
 				<section>
+					<section>
 					<h3>App Widgets</h3>
-					<ul>
-						<li>Mostrare un semplice</li>
-						<li>Considerazioni di design</li>
-						<li>Aggiungere widget al lockscreen</li>
-						<li>Aggiornare il contenuto di un widget</li>
-					</ul>
+					<p>Permettono di aggiungere widget alla home/lock_screen interattivi</p>
+					</section>
+					<section>
+						<h3>App Widgets</h3>
+						<ul><li>Dichiarazione nel manifest</li>
+						<li>File di configurazione appwidget-provider</li>
+						<li>File di layout</li>
+						<li>Implementazione con Broadcast receiver</li></ul>
+					</section>
+					<section>
+						<h4>App Widgets: Implementazione</h4>
+						<pre><code data-lang-xml>
+<receiver android:name="Widget">
+	<intent-filter>
+		<action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+	</intent-filter>
+	<meta-data android:name="android.appwidget.provider"
+			   android:resource="@xml/appwidget_info"/>
+</receiver></code></pre>
+<pre><code data-lang-xml>&lt;appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+	android:minWidth="40dp"
+    android:minHeight="40dp"
+    android:updatePeriodMillis="86400000"
+	android:previewImage="@drawable/preview"
+	android:initialLayout="@layout/example_appwidget"
+    android:configure="com.example.android.ExampleAppWidgetConfigure"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen|keyguard"/&gt;
+</code></pre>
+					<p>Layout può contenere solo view remotabili</p>
+					</section>
+					<section>
+						<h4>App Widgets</h4>
+						<pre><code data-lang-java>public class Widget extends AppWidgetProvider{
+public void onUpdate(Context context, AppWidgetManager mgr, int[] appWidgetIds){
+  String pkg =context.getPackageName();
+  for(int i:appWidgetsIds){
+    RemoteViews views= new RemoteViews(pkg,R.layout.widget);
+    views.setOnClickPendingIntent(R.id.widget,action);
+    views.setText(R.id.out,"Text");
+    mgr.updateAppWidget(id,views);
+  }
+}</code></pre>
+					</section>
 				</section>
 				<section>
 					<h3>Sincronizzarsi con il cloud/lavorare in background</h3>
@@ -672,16 +770,81 @@ LocationServices.GeofencingApi.removeGeofences(mGClient,/*intent or ids*/);
 						</ul>
 					</section>
 					<section>
+						<h3>Authenticator</h3>
+						<pre><code data-lang-xml><account-authenticator
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:accountType="example.com"
+  android:icon="@drawable/ic_launcher"
+  android:smallIcon="@drawable/ic_launcher"
+  android:label="@string/app_name"/>
+
+<intent-filter>
+   <action android:name="android.accounts.AccountAuthenticator"/>
+</intent-filter>
+<meta-data
+    android:name="android.accounts.AccountAuthenticator"
+	android:resource="@xml/authenticator"/></code></pre>
+					</section>
+					<section>
 						<h3>Il flow di autenticazione</h3>
 						<img src="./imgs/auth.png"  style="width: 400px;height: auto">
 					</section>
 					<section>
 						<h3>Il sync adapter</h3>
+						<ul>
+							<li>Effettua il trasferimento effettivo</li>
+							<li>Estende AbstractThreadedSyncAdapter</li>
+							<li>Può essere invisibile all'utente</li>
+						</ul>
+					</section>
+					<section>
+						<pre><code data-lang-java>public class SyncAdapter extends AbstractThreadedSyncAdapter{
+public SyncAdapter(Context context,boolean autoInitialize,boolean allowParallelSyncs){}
+
+@Override
+public void onPerformSync(Account account, Bundle extras, String authority,
+	ContentProviderClient provider, SyncResult syncResult) { }
+public void onCancelSync(){}</code></pre>
+						<pre><code data-lang-xml><sync-adapter
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:contentAuthority="nome_provider_auth"
+  android:accountType="nome_account"
+  android:userVisible="false"
+  android:supportsUploading="true"
+  android:allowParallelSyncs="false"
+  android:isAlwaysSyncable="false"
+  android:syncAdapterSettingsAction=""/>
+
+<uses-permission
+  android:name="android.permission.READ_SYNC_SETTINGS"/>
+<uses-permission
+  android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+<uses-permission
+  android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+<service
+  android:exported="true"
+  android:process=":sync">
+  <intent-filter>
+     <action android:name="android.content.SyncAdapter"/>
+  </intent-filter>
+  <meta-data android:name="android.content.SyncAdapter"
+    android:resource="@xml/syncadapter" />
+</service></code></pre>
 
 					</section>
 					<section>
 						<h3>Sincronizzazione</h3>
-					</section>
+<ul>
+	<li>Avviene tramite content resolver</li>
+	<li>Evento associato ad (authority,account)</li>
+</ul>
+<pre><code data-lang-java>
+//AccountManager.addAccountExplicitly(...);
+ContentResolver.requestSync(ACCOUNT, AUTHORITY, null);
+ContentResolver.addPeriodicSync(...);
+ContentResolver.setSyncAutomatically(...);
+//Opzioni in ContentResolver SYNC_*
+</code></pre></section>
 
 				</section>
 
@@ -689,24 +852,57 @@ LocationServices.GeofencingApi.removeGeofences(mGClient,/*intent or ids*/);
 					<section>
 						<h3>JobScheduler/GCMNetworkManager</h3>
 						<ul>
+							<li>Assegnare esecuzione di task in background generici</li>
 							<li>JobScheduler API disponibile sul 54% dei device</li>
 							<li>GCMNetworkManager retrocompatibile fino all'api 9 (99.9% dei device)</li>
 						</ul>
 					</section>
-				</section>
 
-				<section>
 					<section>
-						<h3>In app purchases</h3>
-					</section>
+						<h4>GCM</h4>
+						<ul>
+							<li>Richiede l'uso di GCM</li>
+						</ul>
 
+						<pre><code data-lang-xml>&lt;!--com.google.android.gms.gcm.SERVICE_ACTION_INITIALIZE se vogliamo reinizializzare--&gt;
+<service
+  android:name="Task"
+  android:exported="true"
+  android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
+<intent-filter>
+  <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY" />
+</intent-filter>
+</service></code></pre>
+<pre><code data-lang-java>
+public class Task extends GcmTaskService{
+  public int onRunTask(TaskParams params){/*...*/ return RESULT_*;}
+  public void onInitializeTasks () {/*...*/}
+}</code></pre>
+					</section>
+					<section>
+						<h3>GCM</h3>
+						<pre><code data-lang-java>GcmNetworkManager gcm=GcmNetworkManager.getInstance(this);
+Task task= new OneOffTask.Builder()
+  .setService(Task.class)
+  .setExcecutionWindow(start,end)
+  .setExtras(...)
+  .setTag("JOB_ID")
+  .setRequiredNetwork()
+  .build();
+// o PeriodicTask con periodo (opzionalmente flessibile)
+gcm.schedule(task);
+gcm.cancelTask(Task.class);</code></pre>
+					</section>
 				</section>
+
+				<!--<section>-->
+					<!--<section>-->
+						<!--<h3>In app billing</h3>-->
+					<!--</section>-->
+
+				<!--</section>-->
 			</div>
 		</div>
-
-
-
-
 
 
 		<script src="lib/js/head.min.js"></script>
